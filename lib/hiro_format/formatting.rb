@@ -33,10 +33,12 @@ require 'date'
 			:euro_datetimesecond => {:time_format => "%d-%m-%Y %H:%M:%s", :applicable => [Date, DateTime, Time], :rest => "0000-00-00 00:00:00" },
       :machine_datetime => {:time_format => "%Y%m%d%H%M", :applicable => [Date, DateTime], :rest => "000000000000" },
 
+			# Fixnum is deprecated in Ruby > 2.4.0 should be removed soon.
       :digit6 =>{:format => "%06d", :applicable => [Fixnum, Integer, Float], :rest => "000000"},
       :digit2 =>{:format => "%02d", :applicable => [Fixnum, Integer, Float], :rest => "00"},
 
-      :func =>{:function => "", :applicable => [], :rest => ""},
+      :commify =>{:function => "commify", :applicable => [Integer, Float, String, NilClass], :rest => ""},
+			:euro_commify =>{:function => "euro_commify", :applicable => [Integer, Float, String, NilClass], :rest => ""},
 		}.freeze
 
     def initialize(data, formatting_option=nil)
@@ -103,7 +105,7 @@ require 'date'
           elsif recipe[:format]
             result = recipe[:format] % @data
           elsif recipe[:function]
-            Formatting.send(recipe[:function], @data)
+            result = Formatting.send(recipe[:function], @data)
           end
         else
           result = recipe[:rest]
@@ -143,9 +145,42 @@ require 'date'
 		end
 
 		def self.commify(num)
+			case num.class.to_s
+			when 'Float', 'Integer'
+				return Formatting.commify_string(num.to_s)
+			when 'String'
+				return Formatting.commify_string(num)
+			when 'NilClass'
+				return "0"
+			else
+				return "#{num.class}"
+			end
+		end
+
+		def self.commify_string(num)
 			int, frac = *num.split(".")
 			int = int.gsub(/(\d)(?=\d{3}+$)/, '\\1,')
 			int << "." << frac if frac
+			int
+		end
+
+		def self.euro_commify(num)
+			case num.class.to_s
+			when 'Float', 'Integer'
+				return Formatting.euro_commify_string(num.to_s)
+			when 'String'
+				return Formatting.euro_commify_string(num)
+			when 'NilClass'
+				return "0"
+			else
+				return "#{num.class}"
+			end
+		end
+
+		def self.euro_commify_string(num)
+			int, frac = *num.split(".")
+			int = int.gsub(/(\d)(?=\d{3}+$)/, '\\1.')
+			int << "," << frac if frac
 			int
 		end
 

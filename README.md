@@ -5,7 +5,11 @@ HiroFormat (hiro_format) is a text formatter.
 It converts ruby variables into formatted text by predefined recipe.
 It also supports ANSI color display for console applications, and html class handling to have colorful texts.
 
+## Still Buggy
 
+Sorry, it is still in very early stage of development. If you use this, please update the gem frequently.
+
+Bug reports are welcome.
 
 ## Installation
 
@@ -31,6 +35,7 @@ require 'hiro_format'
 puts "This is a text string".color(:red_marker).to_s
 value = 123456.78
 puts value.formatting(:commify).color(:blue).to_s # 123,456.78 (Blue color)
+puts value.formatting(:euro_commify).color(:red).to_s # 123.456,78 (Red color)
 puts Formatting.new(Date.today, :jp_date).color(:magenta_marker).to_s # 2017-12-24
 puts Date.today.formatting(:euro_date).color(:reverse).to_s # 24-12-2017
 puts Formatting.new(Date.today, :us_date).color("magenta").to_span # <span class="magenta">12-24-2017</span>
