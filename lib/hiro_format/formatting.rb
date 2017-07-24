@@ -34,11 +34,20 @@ require 'date'
       :machine_datetime => {:time_format => "%Y%m%d%H%M", :applicable => [Date, DateTime], :rest => "000000000000" },
 
 			# Fixnum is deprecated in Ruby > 2.4.0 should be removed soon.
-      :digit6 =>{:format => "%06d", :applicable => [Fixnum, Integer, Float], :rest => "000000"},
-      :digit2 =>{:format => "%02d", :applicable => [Fixnum, Integer, Float], :rest => "00"},
+      :digit6 => {:format => "%06d", :applicable => [Fixnum, Integer, Float], :rest => "000000"},
+      :digit2 => {:format => "%02d", :applicable => [Fixnum, Integer, Float], :rest => "00"},
 
-      :commify =>{:function => "commify", :applicable => [Integer, Float, String, NilClass], :rest => ""},
-			:euro_commify =>{:function => "euro_commify", :applicable => [Integer, Float, String, NilClass], :rest => ""},
+      :commify => {:function => "commify", :applicable => [Integer, Float, String, NilClass], :rest => ""},
+			:euro_commify => {:function => "euro_commify", :applicable => [Integer, Float, String, NilClass], :rest => ""},
+			:commify0 => {:function => "commify0", :applicable => [Integer, Float, String, NilClass], :rest => ""},
+			:euro_commify0 => {:function => "euro_commify0", :applicable => [Integer, Float, String, NilClass], :rest => ""},
+			:commify4 => {:function => "commify4", :applicable => [Integer, Float, String, NilClass], :rest => ""},
+			:euro_commify4 => {:function => "euro_commify4", :applicable => [Integer, Float, String, NilClass], :rest => ""},
+
+			:japanese_yen => {:function => "japanese_yen", :applicable => [Integer, Float, String, NilClass], :rest => ""},
+			:euro => {:function => "euro", :applicable => [Integer, Float, String, NilClass], :rest => ""},
+
+			:hide => {:format => "", :applicable => [], :rest => ""},
 		}.freeze
 
     def initialize(data, formatting_option=nil)
@@ -51,26 +60,19 @@ require 'date'
 			self
     end
 
-    def pzm(plus, zero, minus)
-      judge = @data.to_f
-      if judge > 0.0
-        @color_scheme = plus
-      elsif judge < 0.0
-        @color_scheme = minus
-      else
-        @color_scheme = zero
-      end
+    def pzm(plus_zero_minus)
+			pzm?(@data, plus_zero_minus)
 			self
     end
 
-		def pzm?(judge, plus, zero, minus)
+		def pzm?(judge, plus_zero_minus)
       judge = judge.to_f
       if judge > 0.0
-        @color_scheme = plus
+        @color_scheme = plus_zero_minus[0]
       elsif judge < 0.0
-        @color_scheme = minus
+        @color_scheme = plus_zero_minus[2]
       else
-        @color_scheme = zero
+        @color_scheme = plus_zero_minus[1]
       end
 			self
     end
@@ -123,66 +125,98 @@ require 'date'
     end
     alias show to_s
 
-		def to_tag(tag="div")
-			case @color_scheme
-      when :hide
-        content = ''
-      else
-				result = "<#{tag} class=\"#{@color_scheme}\">#{to_string}</#{tag}>"
+		def to_tag(tag="div", klass=nil)
+			klass = @color_scheme unless klass
+			if klass
+				result = "<#{tag} class=\"#{klass}\">#{to_string}</#{tag}>"
+			else
+				result = "<#{tag}>#{to_string}</#{tag}>"
       end
+			result
 		end
 
-		def to_div
-			to_tag("div")
+		def to_div(klass=nil)
+			klass = @color_scheme unless klass
+			to_tag("div", klass)
 		end
 
-		def to_span
-			to_tag("span")
+		def to_span(klass=nil)
+			klass = @color_scheme unless klass
+			to_tag("span", klass)
 		end
 
-		def to_td
-			to_tag("td")
+		def to_td(klass=nil)
+			klass = @color_scheme unless klass
+			to_tag("td", klass)
 		end
 
-		def self.commify(num)
-			case num.class.to_s
-			when 'Float', 'Integer'
-				return Formatting.commify_string(num.to_s)
+		def self.commify_string(num, thousand_sparator=',', decimal_separator='.', decimal=0)
+			int, frac = *num.split(".")
+			int = int.gsub(/(\d)(?=\d{3}+$)/, "\\1#{thousand_sparator}")
+			if decimal > 0
+				int << "#{decimal_separator}"
+				#if frac
+					frac = "#{frac}000000"
+					int << frac[0..(decimal-1)]
+				#else
+				#	""
+				#end
+			end
+			int
+		end
+
+		def self.commify_value(data, thousand_sparator=',', decimal_separator='.', decimal=0 )
+			case data.class.to_s
+			when 'Float'
+				return Formatting.commify_string(data.to_s, thousand_sparator, decimal_separator, decimal)
+			when 'Integer'
+				return Formatting.commify_string(data.to_s, thousand_sparator, decimal_separator, decimal)
 			when 'String'
-				return Formatting.commify_string(num)
+				return Formatting.commify_string(data, thousand_sparator, decimal_separator, decimal)
 			when 'NilClass'
-				return "0"
+				if decimal == 0
+					return "0"
+				else
+					res = "0#{decimal_separator}00000000000"
+					return res[0..(decimal+1)]
+				end
 			else
 				return "#{num.class}"
 			end
 		end
 
-		def self.commify_string(num)
-			int, frac = *num.split(".")
-			int = int.gsub(/(\d)(?=\d{3}+$)/, '\\1,')
-			int << "." << frac if frac
-			int
+		def self.commify(data)
+			Formatting.commify_value(data, ',', '.', 2)
 		end
 
-		def self.euro_commify(num)
-			case num.class.to_s
-			when 'Float', 'Integer'
-				return Formatting.euro_commify_string(num.to_s)
-			when 'String'
-				return Formatting.euro_commify_string(num)
-			when 'NilClass'
-				return "0"
-			else
-				return "#{num.class}"
-			end
+		def self.euro_commify(data)
+			Formatting.commify_value(data, '.', ',', 2)
 		end
 
-		def self.euro_commify_string(num)
-			int, frac = *num.split(".")
-			int = int.gsub(/(\d)(?=\d{3}+$)/, '\\1.')
-			int << "," << frac if frac
-			int
+		def self.commify0(data)
+			Formatting.commify_value(data, ',', '.', 0)
 		end
+
+		def self.euro_commify0(data)
+			Formatting.commify_value(data, '.', ',', 0)
+		end
+
+		def self.commify4(data)
+			Formatting.commify_value(data, ',', '.', 4)
+		end
+
+		def self.euro_commify4(data)
+			Formatting.commify_value(data, '.', ',', 4)
+		end
+
+		def self.japanese_yen(data)
+			"¥ " + Formatting.commify_value(data, ',', '.', 0)
+		end
+
+		def self.euro(data)
+			"€" + Formatting.commify_value(data, '.', ',', 2)
+		end
+
 
 	end
 

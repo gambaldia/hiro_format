@@ -15,11 +15,26 @@ require "hiro_format/formatting"
 require "hiro_format/coloring"
 # require "pry" # gem install pry pry-byebug
 
-value = 123456.78
-print ":commify #{value.class}: "
-puts value.formatting(:commify).color(:blue).to_s
-print ":euro_commify #{value.class}: "
-puts value.formatting(:euro_commify).color(:red).to_s
+values = [1234567890.1234, 0]
+values.each do |value|
+  puts "Value: #{value}"
+  print ":commify: "
+  puts value.formatting(:commify).color(:blue).to_s
+  print ":euro_commify: "
+  puts value.formatting(:euro_commify).color(:red).to_s
+  print ":commify0: "
+  puts value.formatting(:commify0).color(:blue).to_s
+  print ":euro_commify0: "
+  puts value.formatting(:euro_commify0).color(:red).to_s
+  print ":commify4: "
+  puts value.formatting(:commify4).color(:blue).to_s
+  print ":euro_commify4: "
+  puts value.formatting(:euro_commify4).color(:red).to_s
+end
+
+puts "12345".formatting(:japanese_yen).color(:green).to_s
+puts "12345".formatting(:euro).color(:green).to_s
+
 puts Formatting.new(Date.today, :us_date).color(:magenta_marker).to_s
 puts Date.today.formatting(:euro_date).color(:reverse).to_s
 puts Date.today.formatting(:machine_date).color(:cyan_bold).to_s
