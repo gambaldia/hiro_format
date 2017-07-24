@@ -62,7 +62,7 @@
 
     def initialize(data, color_scheme)
       @data = data
-      @color_scheme = nil
+      @color_scheme = color_scheme
     end
 
     def to_s
@@ -81,10 +81,12 @@
     end
 
     def self.show_list
-      puts "Color schemes list:"
+      puts "Color scheme list:"
       COLOR_SCHEMES.each do |key, scheme|
-        puts AnsiColoring.colorize(key, key)
+        print AnsiColoring.colorize(key, key)
+        print ", "
       end
+      puts
     end
 
   end

@@ -6,10 +6,7 @@
 #
 # 2017-07-22 Start
 #
-APP_ROOT = File.dirname(__FILE__)
-$LOAD_PATH << "#{APP_ROOT}"
 require 'date'
-require 'coloring'
 
 	class Formatting
 		YOUBI = %w[日 月 火 水 木 金 土]
@@ -36,8 +33,8 @@ require 'coloring'
 			:euro_datetimesecond => {:time_format => "%d-%m-%Y %H:%M:%s", :applicable => [Date, DateTime, Time], :rest => "0000-00-00 00:00:00" },
       :machine_datetime => {:time_format => "%Y%m%d%H%M", :applicable => [Date, DateTime], :rest => "000000000000" },
 
-      :digit6 =>{:format => "%06d", :applicable => [Integer, Float], :rest => "000000"},
-      :digit2 =>{:format => "%02d", :applicable => [Integer, Float], :rest => "00"},
+      :digit6 =>{:format => "%06d", :applicable => [Fixnum, Integer, Float], :rest => "000000"},
+      :digit2 =>{:format => "%02d", :applicable => [Fixnum, Integer, Float], :rest => "00"},
 
       :func =>{:function => "", :applicable => [], :rest => ""},
 		}.freeze
@@ -52,7 +49,7 @@ require 'coloring'
 			self
     end
 
-    def pzm?(plus, zero, minus)
+    def pzm(plus, zero, minus)
       judge = @data.to_f
       if judge > 0.0
         @color_scheme = plus
@@ -64,7 +61,7 @@ require 'coloring'
 			self
     end
 
-		def pzm(judge, plus, zero, minus)
+		def pzm?(judge, plus, zero, minus)
       judge = judge.to_f
       if judge > 0.0
         @color_scheme = plus
@@ -97,8 +94,9 @@ require 'coloring'
 
 		def to_string
 			if @formatting_option.nil?
-        #result = ""
+        #result = @data.to_s
       elsif recipe = FORMATTER_LIST[@formatting_option]
+				# puts @data.class
         if recipe[:applicable].include?(@data.class)
           if recipe[:time_format]
             result = @data.strftime(recipe[:time_format])
@@ -116,10 +114,9 @@ require 'coloring'
 
     def to_s
 			result = to_string
-			if @color_scheme
+			if @color_scheme && AnsiColoring
 				result = AnsiColoring.colorize(result, @color_scheme)
 			end
-			#binding.pry
       result
     end
     alias show to_s
@@ -213,13 +210,3 @@ require 'coloring'
       Formatting.new(self, option)
     end
   end
-
-	if (__FILE__ == $0)
-    $verbose = true
-		[0, 1234, 12345.67, "test", Date.today, Time.now].each do |value|
-			[:html, :commify, :jp_datewday].each do |fmt|
-				puts "#{value}->#{fmt}: #{value.formatting(fmt).to_s}"
-			end
-		end
-		AnsiColoring.show_list
-	end
