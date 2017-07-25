@@ -9,7 +9,18 @@
 require 'date'
 
 	class Formatting
-		YOUBI = %w[日 月 火 水 木 金 土]
+		if RUBY_VERSION >= '2.4.0'
+			FORMATTER_LIST_SUB = {
+				:digit6 => {:format => "%06d", :applicable => [Integer, Float], :rest => "000000"},
+      	:digit2 => {:format => "%02d", :applicable => [Integer, Float], :rest => "00"},
+			}.freeze
+		else
+			FORMATTER_LIST_SUB = {
+				:digit6 => {:format => "%06d", :applicable => [Fixnum, Integer, Float], :rest => "000000"},
+      	:digit2 => {:format => "%02d", :applicable => [Fixnum, Integer, Float], :rest => "00"},
+			}.freeze
+		end
+
     FORMATTER_LIST = {
 			:date => {:time_format => "%Y-%m-%d", :applicable => [Date, DateTime], :rest => "0000-00-00" },
       :jp_date => {:time_format => "%Y-%m-%d", :applicable => [Date, DateTime], :rest => "0000-00-00" },
@@ -33,10 +44,6 @@ require 'date'
 			:euro_datetimesecond => {:time_format => "%d-%m-%Y %H:%M:%s", :applicable => [Date, DateTime, Time], :rest => "0000-00-00 00:00:00" },
       :machine_datetime => {:time_format => "%Y%m%d%H%M", :applicable => [Date, DateTime], :rest => "000000000000" },
 
-			# Fixnum is deprecated in Ruby > 2.4.0 should be removed soon.
-      :digit6 => {:format => "%06d", :applicable => [Fixnum, Integer, Float], :rest => "000000"},
-      :digit2 => {:format => "%02d", :applicable => [Fixnum, Integer, Float], :rest => "00"},
-
       :commify => {:function => "commify", :applicable => [Integer, Float, String, NilClass], :rest => ""},
 			:euro_commify => {:function => "euro_commify", :applicable => [Integer, Float, String, NilClass], :rest => ""},
 			:commify0 => {:function => "commify0", :applicable => [Integer, Float, String, NilClass], :rest => ""},
@@ -49,11 +56,20 @@ require 'date'
 
 			:hide => {:format => "", :applicable => [], :rest => ""},
 		}.freeze
+		YOUBI = %w[日 月 火 水 木 金 土]
+
+		# Not yet used
+		@@custom_formatter = {}
 
     def initialize(data, formatting_option=nil)
       @data = data
       @formatting_option = formatting_option
     end
+
+		def lookup(lookup_hash)
+			@lookup = lookup_hash
+			self
+		end
 
     def color(color_scheme)
       @color_scheme = color_scheme
@@ -77,17 +93,11 @@ require 'date'
 			self
     end
 
-		def yesno?(yes, no)
-      if @data
-        @color_scheme = yes
-      else
-        @color_scheme = no
-      end
-			self
+		def yesno(yes, no)
+			yesno?(data, yes, no)
     end
 
-
-    def yesno(judge, yes, no)
+    def yesno?(judge, yes, no)
       if judge
         @color_scheme = yes
       else
@@ -96,10 +106,17 @@ require 'date'
 			self
     end
 
+		def get_recipe
+			FORMATTER_LIST[@formatting_option] || FORMATTER_LIST_SUB[@formatting_option]
+			#@@custom_formatter[@formatting_option] || FORMATTER_LIST[@formatting_option] || FORMATTER_LIST_SUB[@formatting_option]
+		end
+
 		def to_string
-			if @formatting_option.nil?
+			if @lookup && (@lookup.is_a?(Hash) || @lookup.is_a?(Array))
+				result = @lookup[@data]
+			elsif @formatting_option.nil?
         #result = @data.to_s
-      elsif recipe = FORMATTER_LIST[@formatting_option]
+      elsif recipe = get_recipe
 				# puts @data.class
         if recipe[:applicable].include?(@data.class)
           if recipe[:time_format]
@@ -217,6 +234,10 @@ require 'date'
 			"€" + Formatting.commify_value(data, '.', ',', 2)
 		end
 
+		# Not yet used
+		def self.add_custom_formatter(new_formatter)
+			@@custom_formatter << new_formatter
+		end
 
 	end
 

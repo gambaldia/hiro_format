@@ -64,7 +64,7 @@ puts "</tr>"
     if field[:callback]
       puts "<td>" + my_friend.send(field[:callback]) + "</td>"
     elsif field[:lookup]
-        puts "<td>" + field[:lookup][my_friend[field[:key]]] + "</td>"
+      puts my_friend[field[:key]].formatting.lookup(field[:lookup]).to_td
     elsif field[:pzm]
       puts my_friend[field[:key]].formatting(field[:format]).pzm(field[:pzm]).to_td
     else

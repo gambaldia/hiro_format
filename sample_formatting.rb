@@ -41,7 +41,7 @@ puts Date.today.formatting(:machine_date).color(:cyan_bold).to_s
 puts "#pzm (Plus, Zero, Minus) can show in different color depending on the value passed."
 [-1, 0, 1].each do |n|
   print "#{n.class}: "
-  puts n.formatting(:digit6).pzm(:reverse, :red_marker, :magenta_marker).to_s
+  puts n.formatting(:digit6).pzm([:reverse, :red_marker, :magenta_marker]).to_s
 end
 puts "Formatting helper for HTML, you set your color in CSS (Cyan Marker)".color(:cyan_marker).to_s
 puts Formatting.new(Date.today, :us_date).color("magenta").to_span # <span class="magenta">12-24-2017</span>
