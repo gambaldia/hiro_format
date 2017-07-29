@@ -2,9 +2,6 @@
 #
 # Formatting Class Usage Example
 #
-# Hiro Utsumi (Github: Gambaldia) - Zolder, Belgium
-#
-#
 # 2017-07-24 Start
 #
 
@@ -13,7 +10,6 @@ APP_ROOT = File.dirname(__FILE__)
 $LOAD_PATH << "#{APP_ROOT}/lib"
 require "hiro_format/formatting"
 require "hiro_format/coloring"
-# require "pry" # gem install pry pry-byebug
 
 values = [1234567890.1234, 0]
 values.each do |value|

@@ -34,12 +34,21 @@ Or install it yourself as:
 
     $ gem install hiro_format
 
-## Usage
+## Usage - Coloring, Command line application
+
+~~~ruby
+require 'hiro_format/coloring'
+
+puts "This is a text string".color(:red_marker).to_s
+puts AnsiColoring.new("This is a text string", :blue_marker).to_s
+~~~
+
+
+## Usage - Formatting + coloring, Command line application
 
 ~~~ruby
 require 'hiro_format'
 
-puts "This is a text string".color(:red_marker).to_s
 value = 123456.78
 puts value.formatting(:commify).color(:blue).to_s # 123,456.78 (Blue color)
 puts value.formatting(:euro_commify).color(:red).to_s # 123.456,78 (Red color)
@@ -47,7 +56,6 @@ puts value.formatting(:euro).to_s # € 123.456,78
 
 puts Formatting.new(Date.today, :jp_date).color(:magenta_marker).to_s # 2017-12-24
 puts Date.today.formatting(:euro_date).color(:reverse).to_s # 24-12-2017
-puts Formatting.new(Date.today, :us_date).color("magenta").to_span # <span class="magenta">12-24-2017</span>
 # pzm means Plus/Zero/Minus
 puts -1.formatting(:digit6).pzm?(12, [:green, :hide, :red]).to_s # -01 (Green)
 puts 0.formatting(:digit6).pzm?(0, [:green, :hide, :red]).to_s #  (No show)
@@ -56,6 +64,13 @@ puts 1.formatting(:digit6).pzm([:green, :hide, :red]).to_s # 000002 (Green)
 
 See formatting_sample.rb for more examples.
 
+## Usage - Formatting, html application
+
+~~~ruby
+require 'hiro_format'
+
+puts Formatting.new(Date.today, :us_date).color("magenta").to_span # <span class="magenta">12-24-2017</span>
+~~~
 
 ## Usage hint for Active Record  / Sequel users
 
