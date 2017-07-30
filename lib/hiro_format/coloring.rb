@@ -79,7 +79,6 @@
         "\033[#{COLOR_SCHEMES[color_scheme]}m#{data}\033[0m"
       end
     end
-    alias :show :colorize
 
     def self.show_list
       puts "Color scheme list:"
