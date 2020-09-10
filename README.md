@@ -12,19 +12,11 @@ It is nice to have a def like "MyString".red , but by using symbols it gives you
 See 'Usage hint for Active Record  / Sequel users'
 
 
-## Still Buggy
-
-Sorry, it is still in very early stage of development. If you use this, please update the gem frequently.
-
-Bug reports are welcome.
-
 ## Installation
 
 Add this line to your application's Gemfile:
 
-```ruby
-gem 'hiro_format'
-```
+    gem 'hiro_format'
 
 And then execute:
 
@@ -33,6 +25,9 @@ And then execute:
 Or install it yourself as:
 
     $ gem install hiro_format
+
+
+
 
 ## Usage - Coloring, Command line application
 
